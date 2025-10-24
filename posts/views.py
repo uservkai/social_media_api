@@ -3,6 +3,8 @@ from rest_framework import viewsets, permissions, status,filters
 from .models import Post, Comment, Like
 from .serializers import PostSerializer, CommentSerializer, LikeSerializer
 from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models import Count
 
 # Create your views here.
 #------------------POST VIEWS---------------------
@@ -12,12 +14,18 @@ class PostListView(viewsets.ModelViewSet):
     serializer_class = PostSerializer
     permission_classes = [permissions.AllowAny]
     
+    def get_queryset(self):
+        return Post.objects.all().annotate(
+            like_count=Count('likes'),
+            comment_count=Count('comments')
+        ).order_by('-created_at', '-like_count', '-comment_count')
+        
+    #filtering, searching, ordering
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter, DjangoFilterBackend]
+    filterset_fields = ['author__username', 'created_at']
+    search_fields = ['author__username', 'content'] 
+    ordering_fields = ['created_at', 'updated_at', 'author__username','like_count', 'comment_count']
     
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ['author__username', 'content']
-    ordering_fields = ['created_at', 'updated_at']
-    
-
 #view/retrieve a single post
 class PostDetailView(viewsets.ModelViewSet):
     queryset = Post.objects.all()
