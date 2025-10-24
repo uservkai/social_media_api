@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import User, Profile, Follow
 from django.contrib.auth import authenticate
 
+# converts user registration data to JSON and creates new user instances
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
 
@@ -17,7 +18,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         )
         Profile.objects.create(user=user)  # auto-create an associated profile
         return user
-    
+
+#converts user login data to JSON and validates credentials  
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
     password = serializers.CharField(max_length=20, write_only=True)
@@ -27,4 +29,9 @@ class LoginSerializer(serializers.Serializer):
         if user and user.is_active:
             return user
         raise serializers.ValidationError("Invalid credentials")
-    
+
+# converts profile model instances to JSON allowing authenticated users to view and update their profile information
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ('bio', 'profile_picture', 'location')
