@@ -1,6 +1,6 @@
 from django.urls import path, include
 from django.contrib import admin
-from .views import ToggleLikeView, PostLikesView, PostListView, PostDetailView, PostCreateView, PostUpdateView, PostDeleteView, CommentListView, CommentDetailView, CommentCreateView, CommentUpdateView, CommentDeleteView 
+from .views import ToggleLikeView, PostLikesView, PostListView, PostDetailView, PostCreateView, PostUpdateView, PostDeleteView, PostCommentListView, PostCommentDetailView, PostCommentCreateView, PostCommentUpdateView, PostCommentDeleteView 
 
 urlpatterns = [
     path('posts/<int:pk>/like/', ToggleLikeView.as_view(), name='toggle-like'),
@@ -10,9 +10,9 @@ urlpatterns = [
     path('posts/create/', PostCreateView.as_view(), name='post-create'),
     path('posts/<int:pk>/update/', PostUpdateView.as_view(), name='post-update'),
     path('posts/<int:pk>/delete/', PostDeleteView.as_view(), name='post-delete'),
-    path('comments/', CommentListView.as_view(), name='comment-list'),
-    path('comments/<int:pk>/', CommentDetailView.as_view(), name='comment-detail'),
-    path('comments/create/', CommentCreateView.as_view(), name='comment-create'),
-    path('comments/<int:pk>/update/', CommentUpdateView.as_view(), name='comment-update'),
-    path('comments/<int:pk>/delete/', CommentDeleteView.as_view(), name='comment-delete'),
+    path('posts/<int:post_id>/comments/', PostCommentListView.as_view(), name='comment-list'),
+    path('posts/<int:post_id>/comments/<int:pk>/', PostCommentDetailView.as_view(), name='comment-detail'),
+    path('posts/<int:post_id>/comments/create/', PostCommentCreateView.as_view(), name='comment-create'),
+    path('posts/<int:post_id>/comments/<int:pk>/update/', PostCommentUpdateView.as_view(), name='comment-update'),
+    path('posts/<int:post_id>/comments/<int:pk>/delete/', PostCommentDeleteView.as_view(), name='comment-delete'),
 ]

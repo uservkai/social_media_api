@@ -56,42 +56,58 @@ class PostDeleteView(viewsets.ModelViewSet):
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticated]
     
-#------------------COMMENT VIEWS---------------------
+#------------------COMMENT VIEWS(comments are nested in posts)---------------------
 #List all comments for a post
-class CommentListView(viewsets.ModelViewSet):
-    queryset = Comment.objects.all().order_by('-created_at')
+class PostCommentListView(viewsets.ReadOnlyModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = [permissions.AllowAny]
     
-#retrieve a single comment
-class CommentDetailView(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
+    def get_queryset(self):
+        post_id = self.kwargs['post_id'] #filter comments by post id from URL
+        return Comment.objects.filter(post_id=post_id).order_by('-created_at')
+    
+#retrieve a single comment under a post
+class PostCommentDetailView(viewsets.ReadOnlyModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = [permissions.AllowAny]
     
-#Create a new comment
-class CommentCreateView(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
+    def get_queryset(self):
+        post_id = self.kwargs['post_id']
+        return Comment.objects.filter(post_id=post_id)
+    
+#Create comment on a post
+class PostCommentCreateView(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        post_id = self.kwargs['post_id']
+        return Comment.objects.filter(post_id=post_id)
     
     def perform_create(self, serializer):#auto set author as the logged in user
-        serializer.save(author=self.request.user)
+        post_id = self.kwargs['post_id']
+        serializer.save(author=self.request.user, post_id=post_id)
         
 #update a comment
-class CommentUpdateView(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
+class PostCommentUpdateView(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        post_id = self.kwargs['post_id']
+        return Comment.objects.filter(post_id=post_id, author=self.request.user)
     
     def perform_update(self, serializer):
         serializer.save(author=self.request.user)#only author can update comment
         
-#delete a comment
-class CommentDeleteView(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
+#delete a comment under a post
+class PostCommentDeleteView(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        post_id = self.kwargs['post_id']
+        return Comment.objects.filter(post_id=post_id, author=self.request.user)
     
 #------------------LIKE VIEWS---------------------
 #handle post like/unlike functionality - a toggle allowing auth users to like, unlike / undo like unlike
