@@ -26,7 +26,7 @@ class LoginView(APIView):
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
-            user = serializer.validated_data
+            user = serializer.validated_data['user']
             token, _ = Token.objects.get_or_create(user=user)
             return Response({'token': token.key}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -55,6 +55,9 @@ class UserListView(generics.ListAPIView):
     permission_classes = [permissions.AllowAny]  # allow anyone to view the user list
     
     def get_queryset(self):#pass req to serializer to access req.user
+        return User.objects.all().order_by('username', 'id')
+        
+    def get_serializer_context(self): #pass req to serializer context
         return {'request': self.request}
     
 #retrieve specific user details
@@ -98,7 +101,7 @@ class UnfollowUserView(APIView):
         try:
             follow = Follow.objects.get(follower=request.user, following=target_user)
             follow.delete() #unfollow the user
-            return Response({"detail": f"You have unfollowed {target_user.username}."}, status=status.HTTP_200_OK)
+            return Response({"detail": f"You have unfollowed {target_user.username}."}, status=status.HTTP_204_NO_CONTENT)
         except Follow.DoesNotExist:#no follow relationship exists
             return Response({"detail": "You are not following this user."}, status=status.HTTP_400_BAD_REQUEST)
 

@@ -16,7 +16,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             email=validated_data['email'],
             password=validated_data['password']
         )
-        Profile.objects.create(user=user)  # auto-create an associated profile
+        Profile.objects.get_or_create(user=user)  # auto-create an associated profile
         return user
 
 #converts user login data to JSON and validates credentials  
@@ -27,7 +27,8 @@ class LoginSerializer(serializers.Serializer):
     def validate(self, data):
         user = authenticate(**data)
         if user and user.is_active:
-            return user
+            data['user'] = user
+            return data
         raise serializers.ValidationError("Invalid credentials")
 
 # converts profile model instances to JSON allowing authenticated users to view and update their profile information
