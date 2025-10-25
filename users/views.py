@@ -119,3 +119,5 @@ class FollowingListView(generics.ListAPIView):
     def get_queryset(self):
         user_id = self.kwargs['user_id']
         return User.objects.filter(followers__follower__id=user_id)  # users whom the target user follows
+    
+
