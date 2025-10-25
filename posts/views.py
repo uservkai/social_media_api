@@ -17,6 +17,9 @@ class PostListView(generics.ListAPIView):
     permission_classes = [permissions.AllowAny]
     
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return Post.objects.none()#swagger compatibility
+        
         return Post.objects.all().annotate(
             like_count=Count('likes'),
             comment_count=Count('comments')
@@ -65,6 +68,9 @@ class PostCommentListView(generics.ListAPIView):
     permission_classes = [permissions.AllowAny]
     
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return Comment.objects.none() #swagger compatibility
+        
         post_id = self.kwargs['post_id'] #filter comments by post id from URL
         return Comment.objects.filter(post_id=post_id).order_by('-created_at')
     
@@ -74,6 +80,9 @@ class PostCommentDetailView(generics.RetrieveAPIView):
     permission_classes = [permissions.AllowAny]
     
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return Comment.objects.none() #swagger compatibility
+        
         post_id = self.kwargs['post_id']
         return Comment.objects.filter(post_id=post_id)
     
@@ -83,6 +92,9 @@ class PostCommentCreateView(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
     
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return Comment.objects.none() #swagger compatibility
+        
         post_id = self.kwargs['post_id']
         return Comment.objects.filter(post_id=post_id)
     
@@ -96,6 +108,9 @@ class PostCommentUpdateView(generics.UpdateAPIView):
     permission_classes = [permissions.IsAuthenticated]
     
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return Comment.objects.none() #swagger compatibility
+        
         post_id = self.kwargs['post_id']
         return Comment.objects.filter(post_id=post_id, author=self.request.user)
     
@@ -108,6 +123,9 @@ class PostCommentDeleteView(generics.DestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
     
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return Comment.objects.none() #swagger compatibility
+        
         post_id = self.kwargs['post_id']
         return Comment.objects.filter(post_id=post_id, author=self.request.user)
     
@@ -139,6 +157,9 @@ class PostLikeListView(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]
     
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return Like.objects.none()
+        
         post_id = self.kwargs['post_id'] #filter likes by queryset
         return Like.objects.filter(post_id=post_id).order_by('-created_at')
  
@@ -149,6 +170,9 @@ class FeedView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return Post.objects.none() #swagger compatibility
+        
         #get list of users the auth user follows
         following_ids = self.request.user.following.values_list('following__id', flat=True)
         
