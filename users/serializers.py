@@ -37,6 +37,28 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = ('bio', 'profile_picture', 'location')
 
 class UserSerializer(serializers.ModelSerializer):
+    # nested profile serializer to include in output
+    follower_count = serializers.SerializerMethodField()
+    following_count = serializers.SerializerMethodField()
+    mutual_friends = serializers.SerializerMethodField()
+    
     class Meta:
         model = User
-        fields = ('id', 'username', 'email')
+        fields = ('id', 'username', 'email', 'follower_count', 'following_count', 'mutual_friends')
+        
+    def get_follower_count(self, obj): #count of followers
+        return obj.followers.count()
+    
+    def get_following_count(self, obj): #count of users this user is following
+        return obj.following.count()
+    
+    def get_mutual_friends(self, obj): #get users following this user
+        followers = set(obj.followers.values_list('follower_id', flat=True))
+        #ids this user is following
+        following = set(obj.following.values_list('following_id', flat=True))
+        
+        #intexection
+        mutuals = followers.intersection(following)
+        return len(mutuals)
+        
+        

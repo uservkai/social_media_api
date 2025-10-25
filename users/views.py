@@ -1,12 +1,13 @@
 from django.shortcuts import render
 from rest_framework import status, permissions
 from rest_framework.response import Response
-from rest_framework.views import APIView, generics
+from rest_framework.views import APIView
 from .serializers import RegisterSerializer, LoginSerializer, ProfileSerializer, UserSerializer
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
 from .models import Profile, Follow
 from django.contrib.auth import get_user_model
+from rest_framework import generics
 
 User = get_user_model()
 # Create your views here.
@@ -53,12 +54,17 @@ class UserListView(generics.ListAPIView):
     serializer_class = UserSerializer
     permission_classes = [permissions.AllowAny]  # allow anyone to view the user list
     
+    def get_queryset(self):#pass req to serializer to access req.user
+        return {'request': self.request}
+    
 #retrieve specific user details
 class UserDetailView(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.AllowAny]  # allow anyone to view user details
     
+    def get_serializer_context(self):#pass req to serializer to access mutual friends
+        return {'request': self.request}
 
 #-----------------Follow/Unfollow views--------------------------
 #view to follow a user
