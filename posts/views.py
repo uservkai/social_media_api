@@ -1,15 +1,16 @@
 from django.shortcuts import render
-from rest_framework import viewsets, permissions, status,filters
+from rest_framework import viewsets, permissions, status, filters, generics
 from .models import Post, Comment, Like
 from .serializers import PostSerializer, CommentSerializer, LikeSerializer
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Count
+from rest_framework.views import APIView
 
 # Create your views here.
 #------------------POST VIEWS---------------------
 #List all posts
-class PostListView(viewsets.ModelViewSet):
+class PostListView(generics.ListAPIView):
     queryset = Post.objects.all().order_by('-created_at')
     serializer_class = PostSerializer
     permission_classes = [permissions.AllowAny]
@@ -27,13 +28,13 @@ class PostListView(viewsets.ModelViewSet):
     ordering_fields = ['created_at', 'updated_at', 'author__username','like_count', 'comment_count']
     
 #view/retrieve a single post
-class PostDetailView(viewsets.ModelViewSet):
+class PostDetailView(generics.RetrieveAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = [permissions.AllowAny]
     
 #Createa a new post
-class PostCreateView(viewsets.ModelViewSet):
+class PostCreateView(generics.CreateAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -42,7 +43,7 @@ class PostCreateView(viewsets.ModelViewSet):
         serializer.save(author=self.request.user)
 
 #update a post
-class PostUpdateView(viewsets.ModelViewSet):
+class PostUpdateView(generics.UpdateAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -51,14 +52,14 @@ class PostUpdateView(viewsets.ModelViewSet):
         serializer.save(author=self.request.user)#only author can update post
 
 #delete a post
-class PostDeleteView(viewsets.ModelViewSet):
+class PostDeleteView(generics.DestroyAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticated]
     
 #------------------COMMENT VIEWS(comments are nested in posts)---------------------
 #List all comments for a post
-class PostCommentListView(viewsets.ReadOnlyModelViewSet):
+class PostCommentListView(generics.ListAPIView):
     serializer_class = CommentSerializer
     permission_classes = [permissions.AllowAny]
     
@@ -67,7 +68,7 @@ class PostCommentListView(viewsets.ReadOnlyModelViewSet):
         return Comment.objects.filter(post_id=post_id).order_by('-created_at')
     
 #retrieve a single comment under a post
-class PostCommentDetailView(viewsets.ReadOnlyModelViewSet):
+class PostCommentDetailView(generics.RetrieveAPIView):
     serializer_class = CommentSerializer
     permission_classes = [permissions.AllowAny]
     
@@ -76,7 +77,7 @@ class PostCommentDetailView(viewsets.ReadOnlyModelViewSet):
         return Comment.objects.filter(post_id=post_id)
     
 #Create comment on a post
-class PostCommentCreateView(viewsets.ModelViewSet):
+class PostCommentCreateView(generics.CreateAPIView):
     serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticated]
     
@@ -89,7 +90,7 @@ class PostCommentCreateView(viewsets.ModelViewSet):
         serializer.save(author=self.request.user, post_id=post_id)
         
 #update a comment
-class PostCommentUpdateView(viewsets.ModelViewSet):
+class PostCommentUpdateView(generics.UpdateAPIView):
     serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticated]
     
@@ -101,7 +102,7 @@ class PostCommentUpdateView(viewsets.ModelViewSet):
         serializer.save(author=self.request.user)#only author can update comment
         
 #delete a comment under a post
-class PostCommentDeleteView(viewsets.ModelViewSet):
+class PostCommentDeleteView(generics.DestroyAPIView):
     serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticated]
     
@@ -111,7 +112,7 @@ class PostCommentDeleteView(viewsets.ModelViewSet):
     
 #------------------LIKE VIEWS---------------------
 #handle post like/unlike functionality - a toggle allowing auth users to like, unlike / undo like unlike
-class ToggleLikeView(viewsets.ModelViewSet):
+class ToggleLikeView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     
     def post(self, request, post_id):
