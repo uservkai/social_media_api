@@ -140,7 +140,7 @@ class PostLikeListView(viewsets.ModelViewSet):
     
     def get_queryset(self):
         post_id = self.kwargs['post_id'] #filter likes by queryset
-        return Like.objects.filter(post_id=post_id.order_by('-created_at'))
+        return Like.objects.filter(post_id=post_id).order_by('-created_at')
  
 #----------------------------feed view------------------------
 #rerurn feed of posts from users the auth user follows; ordered by newest first
