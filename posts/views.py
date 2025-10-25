@@ -152,6 +152,30 @@ class FeedView(generics.ListAPIView):
         #get list of users the auth user follows
         following_ids = self.request.user.following.values_list('following__id', flat=True)
         
+        #filter posts by followed users
+        queryset = Post.objects.filter(author_id__in=following_ids)
+        #optional: search by keyword in content
+        keyword = self.request.query_params.get('search', None)
+        if keyword:
+            queryset = queryset.filter(content__icontains=keyword)
+        #optional: filter by date range
+        start_date = self.request.query_params.get('start_date', None)
+        end_date = self.request.query_params.get('end_date', None)
+        if start_date:
+            queryset = queryset.filter(created_at__gte=start_date)
+        if end_date:
+            queryset = queryset.filter(created_at__lte=end_date)
+        
+        #sorting
+        sort_by = self.request.query_params.get('sort_by')
+        if sort_by == 'popularity':
+            queryset =queryset.annotate(
+                like_count=Count('likes'),
+                comment_count=Count('comments')
+            ).order_by('-popularity', '-created_at')
+        else:  #default sorting by newest
+            queryset =queryset.order_by('-created_at')      
+        
         #return posts from followed users
-        return Post.objects.filter(author_id__in=following_ids).ordered_by('-created_at')
+        return queryset
     
