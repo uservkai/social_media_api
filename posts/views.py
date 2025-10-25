@@ -113,7 +113,6 @@ class PostCommentDeleteView(viewsets.ModelViewSet):
 #handle post like/unlike functionality - a toggle allowing auth users to like, unlike / undo like unlike
 class ToggleLikeView(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
-    serializer_class = LikeSerializer
     
     def post(self, request, post_id):
         try:
@@ -134,12 +133,11 @@ class ToggleLikeView(viewsets.ModelViewSet):
 
 #List all likes for a post; displays liked-by info
 class PostLikeListView(viewsets.ModelViewSet):
-    queryset = Like.objects.all()
     serializer_class = LikeSerializer
     permission_classes = [permissions.AllowAny]
     
     def get_queryset(self):
         post_id = self.kwargs['post_id'] #filter likes by queryset
-        return Like.objects.filter(post__id=post_id. order_by('-created_at'))
+        return Like.objects.filter(post_id=post_id.order_by('-created_at'))
  
      
