@@ -1,6 +1,6 @@
 from django.urls import path, include
 from django.contrib import admin
-from .views import ToggleLikeView, PostLikeListView, PostListView, PostDetailView, PostCreateView, PostUpdateView, PostDeleteView, PostCommentListView, PostCommentDetailView, PostCommentCreateView, PostCommentUpdateView, PostCommentDeleteView 
+from .views import ToggleLikeView, FeedView, PostLikeListView, PostListView, PostDetailView, PostCreateView, PostUpdateView, PostDeleteView, PostCommentListView, PostCommentDetailView, PostCommentCreateView, PostCommentUpdateView, PostCommentDeleteView 
 
 urlpatterns = [
     path('posts/<int:post_id>/like/', ToggleLikeView.as_view(), name='toggle-like'),
@@ -15,4 +15,5 @@ urlpatterns = [
     path('posts/<int:post_id>/comments/create/', PostCommentCreateView.as_view(), name='comment-create'),
     path('posts/<int:post_id>/comments/<int:pk>/update/', PostCommentUpdateView.as_view(), name='comment-update'),
     path('posts/<int:post_id>/comments/<int:pk>/delete/', PostCommentDeleteView.as_view(), name='comment-delete'),
+    path('feed/', FeedView.as_view(), name='user-feed'),
 ]

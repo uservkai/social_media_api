@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Count
 from rest_framework.views import APIView
+from .models import Post
 
 # Create your views here.
 #------------------POST VIEWS---------------------
@@ -141,4 +142,16 @@ class PostLikeListView(viewsets.ModelViewSet):
         post_id = self.kwargs['post_id'] #filter likes by queryset
         return Like.objects.filter(post_id=post_id.order_by('-created_at'))
  
-     
+#----------------------------feed view------------------------
+#rerurn feed of posts from users the auth user follows; ordered by newest first
+class FeedView(generics.ListAPIView):
+    serializer_class = PostSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        #get list of users the auth user follows
+        following_ids = self.request.user.following.values_list('following__id', flat=True)
+        
+        #return posts from followed users
+        return Post.objects.filter(author_id__in=following_ids).ordered_by('-created_at')
+    
