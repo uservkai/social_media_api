@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django_filters',
     'users.apps.UsersConfig',
     'posts.apps.PostsConfig',
+    'drf_yasg',
+    'swagger_ui_bundle',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
